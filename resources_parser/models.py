@@ -56,7 +56,12 @@ class Weapon(Base):
     __tablename__ = 'weapons'
 
     id = Column(Integer, primary_key=True)
-    weapon_name = Column(String(100))
+    weapon_id = Column(String(30))
+    spec_class = Column(String(30))
+    weapon_type = Column(String(20))
+    weapon_size = Column(String(20))
+    turret_sprite = Column(String(150), nullable=True)
+    hardpoint_sprite = Column(String(150), nullable=True)
 
     def __repr__(self):
         return "<Weapon(id={}, name={})>".format(self.id, self.weapon_name)
@@ -76,10 +81,10 @@ class HullMod(Base):
     __tablename__ = 'hull_mods'
 
     id = Column(Integer, primary_key=True)
-    hull_mode_name = Column(String(100))
+    hull_mod_name = Column(String(100))
 
     def __repr__(self):
-        return "<HullMode(id={}, name={})>".format(self.id, self.hull_mode_name)
+        return "<HullMod(id={}, name={})>".format(self.id, self.hull_mod_name)
 
 
 def create_models(engine):

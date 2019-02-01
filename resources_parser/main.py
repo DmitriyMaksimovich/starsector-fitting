@@ -1,8 +1,9 @@
 import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from ship_parser import ShipsParser
 from models import create_models
+from ship_parser import ShipsParser
+from weapon_parser import WeaponsParser
 
 
 try:
@@ -19,9 +20,16 @@ session = Session()
 
 create_models(engine)
 
-parser = ShipsParser(engine)
+ships_parser = ShipsParser(engine, session)
 ship_files = ['./ships/wolf.ship']
-for ship in ship_files:
-    ship = parser(ship)
+for ship_file in ship_files:
+    ship = ships_parser(ship_file)
     session.add(ship)
+session.commit()
+
+weapon_parser = WeaponsParser(engine)
+weapon_files = ['./ships/amblaster.wpn']
+for weapon_file in weapon_files:
+    weapon = weapon_parser(weapon_file)
+    session.add(weapon)
 session.commit()
