@@ -1,4 +1,5 @@
 import sys
+import pprint
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import create_models
@@ -20,16 +21,14 @@ session = Session()
 
 create_models(engine)
 
-ships_parser = ShipsParser(engine, session)
+ships_csv = './ships/ship_data.csv'
 ship_files = ['./ships/wolf.ship']
-for ship_file in ship_files:
-    ship = ships_parser(ship_file)
-    session.add(ship)
-session.commit()
 
-weapon_parser = WeaponsParser(engine)
-weapon_files = ['./ships/amblaster.wpn']
-for weapon_file in weapon_files:
-    weapon = weapon_parser(weapon_file)
-    session.add(weapon)
-session.commit()
+try:
+    ships_parser = ShipsParser(ships_csv)
+    for ship_file in ship_files:
+        ship = ships_parser(ship_file)
+        session.add(ship)
+    session.commit()
+finally:
+    connection.close()

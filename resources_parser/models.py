@@ -31,11 +31,32 @@ class Ship(Base):
     hull_id = Column(String(100))
     hull_size = Column(String(50))
     style = Column(String(50))
-    center = Column(String(20))
+    center = Column(String(10))
     weapon_slots = relationship("WeaponSlot")
-    builtInMods = relationship("HullMod", secondary=hull_mods_association_table)
-    builtInWings = relationship("Wing", secondary=wings_association_table)
-    builtInWeapons = relationship("Weapon", secondary=weapons_association_table)
+    built_in_mods = relationship("HullMod", secondary=hull_mods_association_table)
+    built_in_wings = relationship("Wing", secondary=wings_association_table)
+    built_in_weapons = relationship("Weapon", secondary=weapons_association_table)
+    armor_rating = Column(Float)
+    acceleration = Column(Float)
+    field_8_6_5_4 = Column(Float)
+    cargo = Column(Float)
+    deceleration = Column(Float)
+    flux_dissipation = Column(Float)
+    fuel = Column(Float)
+    fuel_ly = Column(Float)
+    hitpoints = Column(Float)
+    mass = Column(Float)
+    max_crew = Column(Integer)
+    max_flux = Column(Float)
+    max_speed = Column(Float)
+    max_turn_rate = Column(Float)
+    min_crew = Column(Integer)
+    ordnance_points = Column(Integer)
+    shield_arc= Column(Float)
+    shield_efficiency = Column(Float)
+    shield_type = Column(String(20))
+    shield_upkeep = Column(Float)
+    supplies_month = Column(Float)
 
     def __repr__(self):
         return "<Ship(id={}, name={})>".format(self.id, self.ship_name)
@@ -67,14 +88,34 @@ class Weapon(Base):
         return "<Weapon(id={}, name={})>".format(self.id, self.weapon_name)
 
 
+wings_hull_mods_association_table = Table('wings_hull_mods_associations', Base.metadata,
+                                          Column('wing_id', Integer, ForeignKey('wings.id')),
+                                          Column('hull_mod_id', Integer, ForeignKey('hull_mods.id')))
+
+
+wings_weapons_association_table = Table('wings_weapons_associations', Base.metadata,
+                                        Column('wing_id', Integer, ForeignKey('wings.id')),
+                                        Column('weapon_id', Integer, ForeignKey('weapons.id')))
+
+
 class Wing(Base):
     __tablename__ = 'wings'
 
     id = Column(Integer, primary_key=True)
     wing_name = Column(String(100))
+    sprite_name = Column(String(150))
+    width = Column(Float)
+    height = Column(Float)
+    hull_id = Column(String(100))
+    hull_size = Column(String(50))
+    style = Column(String(50))
+    center = Column(String(20))
+    # weapon_slots = relationship("WeaponSlot")
+    builtInMods = relationship("HullMod", secondary=wings_hull_mods_association_table)
+    builtInWeapons = relationship("Weapon", secondary=wings_weapons_association_table)
 
     def __repr__(self):
-        return "<Wing(id={}, name={})>".format(self.id, self.wing)
+        return "<Wing(id={}, name={})>".format(self.id, self.wing_name)
 
 
 class HullMod(Base):
@@ -85,6 +126,15 @@ class HullMod(Base):
 
     def __repr__(self):
         return "<HullMod(id={}, name={})>".format(self.id, self.hull_mod_name)
+
+
+class ShipSystem(Base):
+    __tablename__ = 'ship_systems'
+
+    id = Column(Integer, primary_key=True)
+    system_id = Column(String(20))
+    system_type = Column(String(20))
+    ai_type = Column(String(20))
 
 
 def create_models(engine):
