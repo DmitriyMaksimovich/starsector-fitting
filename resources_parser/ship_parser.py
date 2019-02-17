@@ -66,8 +66,9 @@ class ShipsParser:
         weapon = self.session.query(Weapon).filter_by(weapon_id=weapon_id).first()
         return weapon
 
-    def create_weapon_slot(self, weapon_slot: dict, ship_id: int) -> WeaponSlot:
-        weapon = WeaponSlot(slot_info=weapon_slot, ship_id=ship_id)
+    def create_weapon_slot(self, weapon_slot: dict, ship_name: str) -> WeaponSlot:
+        weapon_slot_string = json.dumps(weapon_slot)
+        weapon = WeaponSlot(slot_info=weapon_slot_string, ship_name=ship_name)
         return weapon
 
     def create_ship(self, ship_data: dict) -> Ship:
@@ -108,7 +109,7 @@ class ShipsParser:
         )
         if ship_data['weapon_slots']:
             for weapon_slot in ship_data['weapon_slots']:
-                weapon = self.create_weapon_slot(weapon_slot, ship.id)
+                weapon = self.create_weapon_slot(weapon_slot, ship.ship_name)
                 ship.weapon_slots.append(weapon)
         """
         Эти вещи временно отключены, так как требуется сперва распарсить соответствующие категории

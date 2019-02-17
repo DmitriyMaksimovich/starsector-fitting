@@ -6,33 +6,32 @@ Base = declarative_base()
 
 
 hull_mods_association_table = Table('hull_mods_associations', Base.metadata,
-                                    Column('ship_id', Integer, ForeignKey('ships.id')),
-                                    Column('hull_mod_id', Integer, ForeignKey('hull_mods.id')))
+                                    Column('hull_mod_id', Integer, ForeignKey('hull_mods.id')),
+                                    Column('ship_name', String(100), ForeignKey('ships.ship_name')))
 
 
 wings_association_table = Table('wings_associations', Base.metadata,
-                                Column('ship_id', Integer, ForeignKey('ships.id')),
-                                Column('wing_id', Integer, ForeignKey('wings.id')))
+                                Column('wing_id', Integer, ForeignKey('wings.id')),
+                                Column('ship_name', String(100), ForeignKey('ships.ship_name')))
 
 
 weapons_association_table = Table('weapons_associations', Base.metadata,
-                                  Column('ship_id', Integer, ForeignKey('ships.id')),
-                                  Column('weapon_id', Integer, ForeignKey('weapons.id')))
+                                  Column('weapon_id', Integer, ForeignKey('weapons.id')),
+                                  Column('ship_name', String(100), ForeignKey('ships.ship_name')))
 
 
 class Ship(Base):
     __tablename__ = 'ships'
 
-    id = Column(Integer, primary_key=True)
-    ship_name = Column(String(100))
+    ship_name = Column(String(100), primary_key=True)
+    hull_id = Column(String(100))
     sprite_name = Column(String(150))
     width = Column(Float)
     height = Column(Float)
-    hull_id = Column(String(100))
     hull_size = Column(String(50))
     style = Column(String(50))
     center = Column(String(10))
-    weapon_slots = relationship("WeaponSlot")
+    weapon_slots = relationship("WeaponSlot", cascade="save-update, merge, delete")
     built_in_mods = relationship("HullMod", secondary=hull_mods_association_table)
     built_in_wings = relationship("Wing", secondary=wings_association_table)
     built_in_weapons = relationship("Weapon", secondary=weapons_association_table)
@@ -59,7 +58,7 @@ class Ship(Base):
     supplies_month = Column(Float)
 
     def __repr__(self):
-        return "<Ship(id={}, name={})>".format(self.id, self.ship_name)
+        return "<Ship(ship_name={})>".format(self.ship_name)
 
 
 class WeaponSlot(Base):
@@ -67,10 +66,10 @@ class WeaponSlot(Base):
 
     id = Column(Integer, primary_key=True)
     slot_info = Column(Text)
-    ship_id = Column(Integer, ForeignKey("ships.id"))
+    ship_name = Column(String(100), ForeignKey('ships.ship_name'))
 
     def __repr__(self):
-        return "<WeaponSlot(id={}, for ship_id={})>".format(self.id, self.ship_id)
+        return "<WeaponSlot(id={}, for ship_name={})>".format(self.id, self.ship_name)
 
 
 class Weapon(Base):
