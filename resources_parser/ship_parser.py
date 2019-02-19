@@ -1,6 +1,6 @@
 import json
 import csv
-from models import Ship, WeaponSlot, HullMod, Wing, Weapon
+from models import Ship, WeaponSlot, Weapon
 
 
 class ShipsParser:
@@ -9,30 +9,35 @@ class ShipsParser:
 
     def __call__(self, path_to_ship_file: str) -> Ship:
         ship_data = self.get_ship_data(path_to_ship_file)
+        if not ship_data:
+            return False
         ship = self.create_ship(ship_data)
         return ship
 
     def create_ships_cache(self, path_to_ships_data: str) -> dict:
-        ship_data_cache = {}
-        with open(path_to_ships_data) as ship_data_file:
-            ships_data = csv.DictReader(ship_data_file)
+        ships_data_cache = {}
+        with open(path_to_ships_data) as ships_data_file:
+            ships_data = csv.DictReader(ships_data_file)
             for line in ships_data:
-                ship_name = line["name"]
-                ship_data_cache[ship_name] = line
-        return ship_data_cache
+                hull_id = line['id']
+                ships_data_cache[hull_id] = line
+        return ships_data_cache
 
     def get_ship_data(self, path_to_ship_file: str) -> dict:
         ship_data_from_ship_file = self.get_ship_data_from_ship_file(path_to_ship_file)
-        ship_name = ship_data_from_ship_file['ship_name']
-        ship_data_from_csv = self.get_ship_data_from_csv(ship_name)
+        if ship_data_from_ship_file['hull_id'].startswith('module_') or \
+           ship_data_from_ship_file['hull_id'].startswith('remnant_'):
+            # stations and modules is not ships
+            return False
+        hull_id = ship_data_from_ship_file['hull_id']
+        ship_data_from_csv = self.get_ship_data_from_csv(hull_id)
+        if not ship_data_from_csv:
+            return False
         ship_data = {**ship_data_from_ship_file, **ship_data_from_csv}
         return ship_data
 
-    def get_ship_data_from_csv(self, ship_name: str) -> dict:
-        ship_data = {}
-        ship_data_csv = self.ships_data_cache[ship_name]
-        for key in ship_data_csv:
-            ship_data[key] = ship_data_csv[key]
+    def get_ship_data_from_csv(self, hull_id: str) -> dict:
+        ship_data = self.ships_data_cache.get(hull_id, False)
         return ship_data
 
     def get_ship_data_from_ship_file(self, path_to_ship_file: str) -> dict:
@@ -47,32 +52,37 @@ class ShipsParser:
         ship_data['hull_size'] = ship_json['hullSize']
         ship_data['style'] = ship_json['style']
         ship_data['center'] = ','. join([str(coord) for coord in ship_json['center']])
-        ship_data['weapon_slots'] = ship_json['weaponSlots']
         ship_data['built_in_mods'] = ship_json.get('builtInMods', None)
         ship_data['built_in_wings'] = ship_json.get('builtInWings', None)
         ship_data['built_in_weapons'] = ship_json.get('builtInWeapons', None)
         ship_data['weapon_slots'] = ship_json.get('weaponSlots', None)
+        ship_data['built_in_weapons'] = ship_json.get('builtInWeapons', {})
         return ship_data
-
-    def get_hull_mod_by_name(self, mod_name: str) -> HullMod:
-        hull_mod = self.session.query(HullMod).filter_by(hull_name=mod_name).first()
-        return hull_mod
-
-    def get_wing_by_name(self, wing_name: str) -> Wing:
-        wing = self.session.query(Wing).filter_by(wing_name=wing_name).first()
-        return wing
 
     def get_weapon_by_id(self, weapon_id: str) -> Weapon:
         weapon = self.session.query(Weapon).filter_by(weapon_id=weapon_id).first()
         return weapon
 
-    def create_weapon_slot(self, weapon_slot: dict, ship_name: str) -> WeaponSlot:
-        weapon_slot_string = json.dumps(weapon_slot)
-        weapon = WeaponSlot(slot_info=weapon_slot_string, ship_name=ship_name)
+    def create_weapon_slot(self, weapon_slot: dict, ship_name: str, built_in_weapons: dict) -> WeaponSlot:
+        weapon = WeaponSlot(slot_id = weapon_slot['id'],
+                            angle = weapon_slot['angle'],
+                            arc = weapon_slot['arc'],
+                            mount = weapon_slot['mount'],
+                            size = weapon_slot['size'],
+                            slot_type = weapon_slot['type'],
+                            location = ','.join([str(coord) for coord in weapon_slot['locations']]),
+                            ship_name = ship_name)
+        if weapon_slot['type'] == 'BUILT_IN':
+            weapon_id = built_in_weapons[weapon_slot['id']]
+            weapon.weapon = weapon_id
         return weapon
 
     def create_ship(self, ship_data: dict) -> Ship:
-        """WIP"""
+        """
+        todo:
+        built_in_mods
+        built_in_wings
+        """
         ship = Ship(
             ship_name = ship_data['ship_name'],
             sprite_name = ship_data['sprite_name'],
@@ -82,50 +92,31 @@ class ShipsParser:
             hull_size = ship_data['hull_size'],
             style = ship_data['style'],
             center = ship_data['center'],
-            # built_in_mods = None,
-            # built_in_wings = None,
-            # built_in_weapons = None,
             armor_rating = ship_data['armor rating'],
             acceleration = ship_data['acceleration'],
-            field_8_6_5_4 = ship_data['8/6/5/4%'],
-            cargo = ship_data['cargo'],
+            field_8_6_5_4 = ship_data['8/6/5/4%'] if ship_data['8/6/5/4%'] else 0,
+            cargo = ship_data['cargo'] if ship_data['cargo'] else 0,
             deceleration = ship_data['deceleration'],
             flux_dissipation = ship_data['flux dissipation'],
-            fuel = ship_data['fuel'],
-            fuel_ly = ship_data['fuel/ly'],
+            fuel = ship_data['fuel'] if ship_data['fuel'] else 0,
+            fuel_ly = ship_data['fuel/ly'] if ship_data['fuel/ly'] else 0,
             hitpoints = ship_data['hitpoints'],
             mass = ship_data['mass'],
-            max_crew = ship_data['max crew'],
+            max_crew = ship_data['max crew'] if ship_data['max crew'] else 0,
             max_flux = ship_data['max flux'],
             max_speed = ship_data['max speed'],
             max_turn_rate = ship_data['max turn rate'],
-            min_crew = ship_data['min crew'],
-            ordnance_points = ship_data['ordnance points'],
-            shield_arc= ship_data['shield arc'],
-            shield_efficiency = ship_data['shield efficiency'],
-            shield_type = ship_data['shield type'],
-            shield_upkeep = ship_data['shield upkeep'],
-            supplies_month = ship_data['supplies/mo']
+            min_crew = ship_data['min crew'] if ship_data['min crew'] else 0,
+            ordnance_points = ship_data['ordnance points'] if ship_data['ordnance points'] else 0,
+            shield_arc = ship_data['shield arc'] if ship_data['shield arc'] else 0,
+            shield_efficiency = ship_data['shield efficiency'] if ship_data['shield efficiency'] else 0,
+            shield_type = ship_data['shield type'] if ship_data['shield type'] else 'none',
+            shield_upkeep = ship_data['shield upkeep'] if ship_data['shield upkeep'] else 0,
+            supplies_month = ship_data['supplies/mo'] if ship_data['supplies/mo'] else 0
         )
         if ship_data['weapon_slots']:
+            built_in_weapons = ship_data.get('built_in_weapons', {})
             for weapon_slot in ship_data['weapon_slots']:
-                weapon = self.create_weapon_slot(weapon_slot, ship.ship_name)
+                weapon = self.create_weapon_slot(weapon_slot, ship.ship_name, built_in_weapons)
                 ship.weapon_slots.append(weapon)
-        """
-        Эти вещи временно отключены, так как требуется сперва распарсить соответствующие категории
-        if built_in_mods:
-            for mod_name in built_in_mods:
-                mode = self.get_hull_mod_by_name(mod_name)
-                ship.built_in_mods.append(mode)
-        if built_in_wings:
-            for wing_name in built_in_wings:
-                wing = self.get_wing_by_name(wing_name)
-                ship.built_in_wings.append(wing)
-        if built_in_weapons:
-            for weapon_id in built_in_weapons:
-                weapon = self.get_weapon_by_id(weapon_id)
-                ship.built_in_weapons.append(weapon)
-        return ship
-               ship.weapon_slots.append(weapon)
-        """
         return ship

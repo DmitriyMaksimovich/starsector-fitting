@@ -1,13 +1,13 @@
 import unittest
 import json
-from json_pythonizer import json_load, json_loads, remove_extra_commas, remove_python_style_comments
+from json_cleaner import json_load, json_loads, remove_extra_commas, remove_python_style_comments, remove_incorrect_lists
 
 
 class TestJsonCleaner(unittest.TestCase):
     def setUp(self):
         self.path_to_dirty_json_file = './bad.json'
-        self.correct_json_string = '{"a":[\n\t1,\n\t2,\n\t3],  \n"b": "B",\n\t"c":{"ca": "CA"}}\n'
-        self.python_json = {'a': [1, 2, 3], 'b': 'B', 'c': {'ca': 'CA'}}
+        self.correct_json_string = '{"a":[\n\t1,\n\t2,\n\t3],  \n "b": "B",\n "v": "",\n\t"c":{"ca": "CA"}}\n'
+        self.python_json = {'a': [1, 2, 3], 'b': 'B', 'v': '', 'c': {'ca': 'CA'}}
 
     def test_remove_extra_commas(self):
         test_string_1 = "{'a':10, b:20,}"
@@ -24,6 +24,10 @@ class TestJsonCleaner(unittest.TestCase):
         self.assertEqual(remove_python_style_comments(test_string_1), "{'a':10\n}\n")
         self.assertEqual(remove_python_style_comments(test_string_2), "{'a':10\n}\n")
         self.assertEqual(remove_python_style_comments(test_string_3), "{'a':10,\nb:20\n}\n")
+
+    def test_remove_incorrect_lists(self):
+        test_string_1 = '{"a": [ABC_abc]}'
+        self.assertEqual(remove_incorrect_lists(test_string_1), '{"a": ""}')
 
     def test_json_load(self):
         cleared_string = json_load(self.path_to_dirty_json_file)
