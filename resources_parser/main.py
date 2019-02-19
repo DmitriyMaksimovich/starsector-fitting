@@ -60,10 +60,8 @@ def copy_weapon_sprites_to_static(weapon: Weapon):
         shutil.copyfile(hardpoint_sprite, hardpoint_dist_path)
 
 
-create_models(engine)
-
-
 engine = create_engine("postgresql+psycopg2://admiral:fleet@localhost/starsector",  isolation_level="READ UNCOMMITTED")
+create_models(engine)
 connection = engine.connect()
 Session = sessionmaker(bind=engine)
 session = Session()

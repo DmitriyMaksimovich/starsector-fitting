@@ -6,6 +6,7 @@ from models import Ship, WeaponSlot, Weapon
 class ShipsParser:
     def __init__(self, path_to_ships_data: str):
         self.ships_data_cache = self.create_ships_cache(path_to_ships_data)
+        self.ignored_hulls = ['module', 'remnant', 'station', 'derelict', 'platform']
 
     def __call__(self, path_to_ship_file: str) -> Ship:
         ship_data = self.get_ship_data(path_to_ship_file)
@@ -25,11 +26,11 @@ class ShipsParser:
 
     def get_ship_data(self, path_to_ship_file: str) -> dict:
         ship_data_from_ship_file = self.get_ship_data_from_ship_file(path_to_ship_file)
-        if ship_data_from_ship_file['hull_id'].startswith('module_') or \
-           ship_data_from_ship_file['hull_id'].startswith('remnant_'):
-            # stations and modules is not ships
-            return False
+        # stations and modules is not ships
         hull_id = ship_data_from_ship_file['hull_id']
+        for hull in self.ignored_hulls:
+            if hull_id.startswith(hull):
+                return False
         ship_data_from_csv = self.get_ship_data_from_csv(hull_id)
         if not ship_data_from_csv:
             return False

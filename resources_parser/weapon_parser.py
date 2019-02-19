@@ -74,4 +74,3 @@ class WeaponsParser:
             weapon_type = weapon_data['type']
         )
         return weapon
-
