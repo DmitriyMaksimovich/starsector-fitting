@@ -46,11 +46,3 @@ def json_load(json_file):
     except IOError:
         print('File not found')
         return
-
-
-#import json
-#f = './heavymauler.wpn'
-#c = json_load(f)
-#print(c)
-#v = json.loads(c)
-#print(v)
