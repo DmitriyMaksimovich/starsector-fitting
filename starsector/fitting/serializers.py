@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from fitting.models import Ships
+from fitting.models import Ships, WeaponSlots, Weapons
 
 
 class ShipSerializer(serializers.ModelSerializer):
@@ -12,28 +12,78 @@ class ShipSerializer(serializers.ModelSerializer):
             'sprite_name',
             'width',
             'height',
-            'hull',
+            'hull_size',
             'style',
             'center',
-            'armor',
+            'weapon_slots',
+            'armor_rating',
             'acceleration',
-            'field',
+            'field_8_6_5_4',
             'cargo',
             'deceleration',
-            'flux',
+            'flux_dissipation',
             'fuel',
-            'fuel',
+            'fuel_ly',
             'hitpoints',
             'mass',
-            'max',
-            'max',
-            'max',
-            'max',
-            'min',
-            'ordnance',
-            'shield',
-            'shield',
-            'shield',
-            'shield',
-            'supplie'
+            'max_crew',
+            'max_flux',
+            'max_speed',
+            'max_turn_rate',
+            'min_crew',
+            'ordnance_points',
+            'shield_arc',
+            'shield_efficiency',
+            'shield_type',
+            'shield_upkeep',
+            'supplie_month',
+            'description'
+        ]
+
+
+class WeaponSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeaponSlots
+        fields = '__all__'
+        read_only_fields = [
+            'id',
+            'slot_id',
+            'angle',
+            'arc',
+            'mount',
+            'size',
+            'slot_type',
+            'location',
+            'ship_name',
+            'weapon'
+        ]
+
+
+class WeaponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weapons
+        fields = '__all__'
+        read_only_fields = [
+            'weapon_id',
+            'weapon_name',
+            'ops',
+            'ammo',
+            'ammo_sec',
+            'autocharge',
+            'requires_full_charge',
+            'burst_size',
+            'damage_sec',
+            'damage_shot',
+            'emp',
+            'energy_second',
+            'energy_shot',
+            'hardpoint_sprite',
+            'weapon_range',
+            'size',
+            'spec_class',
+            'turn_rate',
+            'turret_sprite',
+            'proj_speed',
+            'weapon_type',
+            'description'
         ]

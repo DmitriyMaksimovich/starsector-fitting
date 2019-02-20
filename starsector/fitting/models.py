@@ -31,6 +31,7 @@ class Ships(models.Model):
     shield_type = models.CharField(max_length=20, blank=True, null=True)
     shield_upkeep = models.FloatField(blank=True, null=True)
     supplies_month = models.FloatField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
         db_table = 'ships'
@@ -42,8 +43,15 @@ class Ships(models.Model):
 
 
 class WeaponSlots(models.Model):
-    slot_info = models.TextField(blank=True, null=True)
+    slot_id = models.CharField(max_length=10, blank=True, null=True)
+    angle = models.FloatField(blank=True, null=True)
+    arc = models.FloatField(blank=True, null=True)
+    mount = models.CharField(max_length=10, blank=True, null=True)
+    size = models.CharField(max_length=15, blank=True, null=True)
+    slot_type = models.CharField(max_length=15, blank=True, null=True)
+    location = models.CharField(max_length=80, blank=True, null=True)
     ship_name = models.ForeignKey(Ships, models.DO_NOTHING, db_column='ship_name', blank=True, null=True)
+    weapon = models.ForeignKey('Weapons', models.DO_NOTHING, db_column='weapon', blank=True, null=True)
 
     class Meta:
         db_table = 'weapon_slots'
@@ -52,3 +60,35 @@ class WeaponSlots(models.Model):
 
     def __str__(self):
         return "WeaponSlot {} for {}".format(self.pk, self.ship_name)
+
+class Weapons(models.Model):
+    weapon_id = models.CharField(primary_key=True, max_length=50)
+    weapon_name = models.CharField(max_length=50, blank=True, null=True)
+    ops = models.IntegerField(blank=True, null=True)
+    ammo = models.IntegerField(blank=True, null=True)
+    ammo_sec = models.FloatField(blank=True, null=True)
+    autocharge = models.BooleanField(blank=True, null=True)
+    requires_full_charge = models.BooleanField(blank=True, null=True)
+    burst_size = models.FloatField(blank=True, null=True)
+    damage_sec = models.FloatField(blank=True, null=True)
+    damage_shot = models.FloatField(blank=True, null=True)
+    emp = models.FloatField(blank=True, null=True)
+    energy_second = models.FloatField(blank=True, null=True)
+    energy_shot = models.FloatField(blank=True, null=True)
+    hardpoint_sprite = models.CharField(max_length=100, blank=True, null=True)
+    weapon_range = models.IntegerField(blank=True, null=True)
+    size = models.CharField(max_length=10, blank=True, null=True)
+    spec_class = models.CharField(max_length=15, blank=True, null=True)
+    turn_rate = models.IntegerField(blank=True, null=True)
+    turret_sprite = models.CharField(max_length=100, blank=True, null=True)
+    proj_speed = models.IntegerField(blank=True, null=True)
+    weapon_type = models.CharField(max_length=15, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'weapons'
+        verbose_name = 'weapon'
+        verbose_name_plural = 'weapons'
+
+    def __str__(self):
+        return self.weapon_id
