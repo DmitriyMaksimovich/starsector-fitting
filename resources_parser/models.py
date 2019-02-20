@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table, Boolean
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table, Boolean, Text
 from sqlalchemy.orm import relationship
 
 
@@ -39,6 +39,7 @@ class Ship(Base):
     shield_type = Column(String(20))
     shield_upkeep = Column(Float)
     supplies_month = Column(Float)
+    description = Column(Text)
 
     def __repr__(self):
         return "<Ship(ship_name={})>".format(self.ship_name)
@@ -86,6 +87,7 @@ class Weapon(Base):
     turret_sprite = Column(String(100))
     proj_speed = Column(Integer)
     weapon_type = Column(String(15))
+    description = Column(Text)
 
     def __repr__(self):
         return "<Weapon(id={}, name={})>".format(self.weapon_id, self.weapon_name)

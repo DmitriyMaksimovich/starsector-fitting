@@ -14,6 +14,7 @@ except IndexError:
     PATH_TO_GAME = os.path.expanduser('~/Starsector/')
 PATH_TO_HULLS = PATH_TO_GAME + 'data/hulls/'
 PATH_TO_WEAPONS = PATH_TO_GAME + 'data/weapons/'
+PATH_TO_DESCRIPTIONS = PATH_TO_GAME + 'data/strings/descriptions.csv'
 PATH_TO_STATIC = os.path.expanduser('~/Dev/starsector-fitting/starsector/fitting/static/fitting/')
 
 
@@ -63,13 +64,14 @@ def copy_weapon_sprites_to_static(weapon: Weapon):
 engine = create_engine("postgresql+psycopg2://admiral:fleet@localhost/starsector",  isolation_level="READ UNCOMMITTED")
 create_models(engine)
 connection = engine.connect()
-Session = sessionmaker(bind=engine)
-session = Session()
 
-try:
+with engine.connect() as connection:
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
     weapon_csv = PATH_TO_GAME + 'data/weapons/weapon_data.csv'
     weapon_files = [os.path.join(PATH_TO_WEAPONS, f) for f in os.listdir(PATH_TO_WEAPONS) if os.path.isfile(os.path.join(PATH_TO_WEAPONS, f)) and f.endswith('.wpn')]
-    weapon_parser = WeaponsParser(weapon_csv)
+    weapon_parser = WeaponsParser(weapon_csv, PATH_TO_DESCRIPTIONS)
     for weapon_file in weapon_files:
         weapon = weapon_parser(weapon_file)
         if weapon.weapon_type == 'DECORATIVE':
@@ -79,7 +81,7 @@ try:
 
     ships_csv = PATH_TO_GAME + 'data/hulls/ship_data.csv'
     ship_files = [os.path.join(PATH_TO_HULLS, f) for f in os.listdir(PATH_TO_HULLS) if os.path.isfile(os.path.join(PATH_TO_HULLS, f)) and f.endswith('.ship')]
-    ships_parser = ShipsParser(ships_csv)
+    ships_parser = ShipsParser(ships_csv, PATH_TO_DESCRIPTIONS)
     for ship_file in ship_files:
         ship = ships_parser(ship_file)
         if not ship:
@@ -87,5 +89,3 @@ try:
         ship = insert_or_update_ship(ship)
         copy_ship_sprite_to_static(ship)
     session.commit()
-finally:
-    connection.close()

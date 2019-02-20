@@ -5,8 +5,9 @@ from models import Weapon
 
 
 class WeaponsParser:
-    def __init__(self, path_to_weapons_data: str):
+    def __init__(self, path_to_weapons_data: str, path_to_descriptions_file: str):
         self.weapon_data_cache = self.create_weapons_cache(path_to_weapons_data)
+        self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)
 
     def __call__(self, path_to_weapon_file: str) -> Weapon:
         weapon_data = self.get_weapon_data(path_to_weapon_file)
@@ -22,11 +23,23 @@ class WeaponsParser:
                 weapons_data_cache[weapon_id] = line
         return weapons_data_cache
 
+    def create_descriptions_cache(self, path_to_descriptions_file: str) -> dict:
+        descriptions = {}
+        with open(path_to_descriptions_file) as descriptions_file:
+            descriptions_data = csv.DictReader(descriptions_file)
+            for line in descriptions_data:
+                line_type = line['type']
+                if line_type == 'WEAPON':
+                    weapon_id = line['id']
+                    descriptions[weapon_id] = line['text1']
+        return descriptions
+
     def get_weapon_data(self, path_to_weapon_file: str) -> dict:
         weapon_data_from_weapon_file = self.get_weapon_data_from_weapon_file(path_to_weapon_file)
         weapon_id = weapon_data_from_weapon_file['weapon_id']
+        weapon_description = self.descriptions.get(weapon_id, '')
         weapon_data_from_csv = self.get_weapon_data_from_csv(weapon_id)
-        weapon_data = {**weapon_data_from_csv, **weapon_data_from_weapon_file}
+        weapon_data = {**weapon_data_from_csv, **weapon_data_from_weapon_file, 'description': weapon_description}
         return weapon_data
 
     def get_weapon_data_from_csv(self, weapon_id: str) -> dict:
@@ -71,6 +84,7 @@ class WeaponsParser:
             turn_rate = weapon_data['turn rate'] if weapon_data['turn rate'] else 0,
             turret_sprite = weapon_data['turret_sprite'],
             proj_speed = weapon_data['proj speed'] if weapon_data['proj speed'] else 0,
-            weapon_type = weapon_data['type']
+            weapon_type = weapon_data['type'],
+            description = weapon_data['description']
         )
         return weapon

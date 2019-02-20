@@ -4,9 +4,11 @@ from models import Ship, WeaponSlot, Weapon
 
 
 class ShipsParser:
-    def __init__(self, path_to_ships_data: str):
+    ignored_hulls = ['module', 'remnant', 'station', 'derelict', 'platform']
+
+    def __init__(self, path_to_ships_data: str, path_to_descriptions_file):
         self.ships_data_cache = self.create_ships_cache(path_to_ships_data)
-        self.ignored_hulls = ['module', 'remnant', 'station', 'derelict', 'platform']
+        self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)
 
     def __call__(self, path_to_ship_file: str) -> Ship:
         ship_data = self.get_ship_data(path_to_ship_file)
@@ -24,17 +26,29 @@ class ShipsParser:
                 ships_data_cache[hull_id] = line
         return ships_data_cache
 
+    def create_descriptions_cache(self, path_to_descriptions_file: str) -> dict:
+        descriptions = {}
+        with open(path_to_descriptions_file) as descriptions_file:
+            descriptions_data = csv.DictReader(descriptions_file)
+            for line in descriptions_data:
+                line_type = line['type']
+                if line_type == 'SHIP':
+                    hull_id = line['id']
+                    descriptions[hull_id] = line['text1']
+        return descriptions
+
     def get_ship_data(self, path_to_ship_file: str) -> dict:
         ship_data_from_ship_file = self.get_ship_data_from_ship_file(path_to_ship_file)
-        # stations and modules is not ships
         hull_id = ship_data_from_ship_file['hull_id']
+        # stations and modules is not ships
         for hull in self.ignored_hulls:
             if hull_id.startswith(hull):
                 return False
         ship_data_from_csv = self.get_ship_data_from_csv(hull_id)
         if not ship_data_from_csv:
             return False
-        ship_data = {**ship_data_from_ship_file, **ship_data_from_csv}
+        ship_description = self.descriptions.get(hull_id, '')
+        ship_data = {**ship_data_from_ship_file, **ship_data_from_csv, 'description': ship_description}
         return ship_data
 
     def get_ship_data_from_csv(self, hull_id: str) -> dict:
@@ -113,7 +127,8 @@ class ShipsParser:
             shield_efficiency = ship_data['shield efficiency'] if ship_data['shield efficiency'] else 0,
             shield_type = ship_data['shield type'] if ship_data['shield type'] else 'none',
             shield_upkeep = ship_data['shield upkeep'] if ship_data['shield upkeep'] else 0,
-            supplies_month = ship_data['supplies/mo'] if ship_data['supplies/mo'] else 0
+            supplies_month = ship_data['supplies/mo'] if ship_data['supplies/mo'] else 0,
+            description = ship_data['description']
         )
         if ship_data['weapon_slots']:
             built_in_weapons = ship_data.get('built_in_weapons', {})
