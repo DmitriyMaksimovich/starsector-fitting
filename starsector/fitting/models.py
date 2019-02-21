@@ -42,25 +42,6 @@ class Ships(models.Model):
         return "{}".format(self.ship_name)
 
 
-class WeaponSlots(models.Model):
-    slot_id = models.CharField(max_length=10, blank=True, null=True)
-    angle = models.FloatField(blank=True, null=True)
-    arc = models.FloatField(blank=True, null=True)
-    mount = models.CharField(max_length=10, blank=True, null=True)
-    size = models.CharField(max_length=15, blank=True, null=True)
-    slot_type = models.CharField(max_length=15, blank=True, null=True)
-    location = models.CharField(max_length=80, blank=True, null=True)
-    ship_name = models.ForeignKey(Ships, models.DO_NOTHING, db_column='ship_name', blank=True, null=True)
-    weapon = models.ForeignKey('Weapons', models.DO_NOTHING, db_column='weapon', blank=True, null=True)
-
-    class Meta:
-        db_table = 'weapon_slots'
-        verbose_name = 'weapon_slot'
-        verbose_name_plural = 'weapon_slots'
-
-    def __str__(self):
-        return "WeaponSlot {} for {}".format(self.pk, self.ship_name)
-
 class Weapons(models.Model):
     weapon_id = models.CharField(primary_key=True, max_length=50)
     weapon_name = models.CharField(max_length=50, blank=True, null=True)
@@ -92,3 +73,23 @@ class Weapons(models.Model):
 
     def __str__(self):
         return self.weapon_id
+
+
+class WeaponSlots(models.Model):
+    slot_id = models.CharField(max_length=10, blank=True, null=True)
+    angle = models.FloatField(blank=True, null=True)
+    arc = models.FloatField(blank=True, null=True)
+    mount = models.CharField(max_length=10, blank=True, null=True)
+    size = models.CharField(max_length=15, blank=True, null=True)
+    slot_type = models.CharField(max_length=15, blank=True, null=True)
+    location = models.CharField(max_length=80, blank=True, null=True)
+    ship_name = models.ForeignKey(Ships,  models.DO_NOTHING, db_column='ship_name', blank=True, null=True, related_name = 'weapon_slots')
+    weapon = models.ForeignKey(Weapons, models.DO_NOTHING, db_column='weapon', blank=True, null=True)
+
+    class Meta:
+        db_table = 'weapon_slots'
+        verbose_name = 'weapon_slot'
+        verbose_name_plural = 'weapon_slots'
+
+    def __str__(self):
+        return "WeaponSlot {} for {}".format(self.pk, self.ship_name)
