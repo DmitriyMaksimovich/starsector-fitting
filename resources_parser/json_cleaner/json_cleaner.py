@@ -36,9 +36,9 @@ def json_loads(json_string):
     return cleared_json
 
 
-def json_load(json_file):
+def json_load(path_to_json_file):
     try:
-        with open(json_file) as json_file:
+        with open(path_to_json_file) as json_file:
             json_string = json_file.read()
             json_string.strip()
             cleared_json = json_loads(json_string)
