@@ -38,11 +38,12 @@ def insert_or_update_weapon(weapon: Weapon, session) -> Weapon:
 
 
 def copy_ship_sprite_to_static(ship: Ship, path_to_game: str):
-    sprite_path = path_to_game + '/' + ship.sprite_name
+    ship_sprite = re.sub('^/[^/]+/', '/', ship.sprite_name)
+    path_to_sprite = path_to_game + ship_sprite
     dist_path = PATH_TO_STATIC + ship.sprite_name
     dir_name, _ = os.path.split(dist_path)
     os.makedirs(dir_name, exist_ok=True)
-    shutil.copyfile(sprite_path, dist_path)
+    shutil.copyfile(path_to_sprite, dist_path)
 
 
 def copy_weapon_sprites_to_static(weapon: Weapon, path_to_game: str):

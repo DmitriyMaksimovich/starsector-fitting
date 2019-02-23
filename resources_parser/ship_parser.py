@@ -63,7 +63,8 @@ class ShipsParser:
             ship_json = json.loads(ship_cleaned)
         ship_data = {}
         ship_data['ship_name'] = ship_json['hullName']
-        ship_data['sprite_name'] = ship_json['spriteName']
+        ship_sprite = '/' + self.mod_name + '/' + ship_json['spriteName']
+        ship_data['sprite_name'] = ship_sprite
         ship_data['width'] = int(ship_json['width'])
         ship_data['height'] = int(ship_json['height'])
         ship_data['hull_id'] = ship_json['hullId']
