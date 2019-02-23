@@ -28,7 +28,8 @@ class WeaponSerializer(serializers.ModelSerializer):
             'turret_sprite',
             'proj_speed',
             'weapon_type',
-            'description'
+            'description',
+            'mod_name'
         ]
 
 
@@ -91,4 +92,5 @@ class ShipSerializer(serializers.ModelSerializer):
             'shield_upkeep',
             'supplies_month',
             'description',
+            'mod_name'
         ]

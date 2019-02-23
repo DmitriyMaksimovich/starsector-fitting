@@ -9,7 +9,7 @@ class Ships(models.Model):
     height = models.FloatField(blank=True, null=True)
     hull_size = models.CharField(max_length=50, blank=True, null=True)
     style = models.CharField(max_length=50, blank=True, null=True)
-    center = models.CharField(max_length=10, blank=True, null=True)
+    center = models.CharField(max_length=15, blank=True, null=True)
     armor_rating = models.FloatField(blank=True, null=True)
     acceleration = models.FloatField(blank=True, null=True)
     field_8_6_5_4 = models.FloatField(blank=True, null=True)
@@ -32,6 +32,7 @@ class Ships(models.Model):
     shield_upkeep = models.FloatField(blank=True, null=True)
     supplies_month = models.FloatField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    mod_name = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         db_table = 'ships'
@@ -65,6 +66,7 @@ class Weapons(models.Model):
     proj_speed = models.IntegerField(blank=True, null=True)
     weapon_type = models.CharField(max_length=15, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    mod_name = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         db_table = 'weapons'
@@ -76,7 +78,7 @@ class Weapons(models.Model):
 
 
 class WeaponSlots(models.Model):
-    slot_id = models.CharField(max_length=10, blank=True, null=True)
+    slot_id = models.CharField(max_length=30, blank=True, null=True)
     angle = models.FloatField(blank=True, null=True)
     arc = models.FloatField(blank=True, null=True)
     mount = models.CharField(max_length=10, blank=True, null=True)

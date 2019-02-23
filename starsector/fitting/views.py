@@ -25,11 +25,14 @@ class ShipsList(generics.ListAPIView):
     def get_queryset(self):
         queryset = Ships.objects.all()
         style = self.request.query_params.get('style', None)
-        hull_size = self.request.query_params.get('hull_size', None)
         if style is not None:
             queryset = queryset.filter(style=style)
+        hull_size = self.request.query_params.get('hull_size', None)
         if hull_size is not None:
             queryset = queryset.filter(hull_size=hull_size)
+        mod = self.request.query_params.get('mod', None)
+        if mod is not None:
+            queryset = queryset.filter(mod_name=mod)
         return queryset
 
 
@@ -57,11 +60,14 @@ class WeaponsList(generics.ListAPIView):
     def get_queryset(self):
         queryset = Weapons.objects.all()
         size = self.request.query_params.get('size', None)
-        weapon_type = self.request.query_params.get('weapon_type', None)
         if size is not None:
             queryset = queryset.filter(size=size)
+        weapon_type = self.request.query_params.get('weapon_type', None)
         if weapon_type is not None:
             queryset = queryset.filter(weapon_type=weapon_type)
+        mod = self.request.query_params.get('mod', None)
+        if mod is not None:
+            queryset = queryset.filter(mod_name=mod)
         return queryset
 
 
