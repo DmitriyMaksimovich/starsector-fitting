@@ -5,12 +5,15 @@ from models import Weapon
 
 
 class WeaponsParser:
-    def __init__(self, path_to_weapons_data: str, path_to_descriptions_file: str):
+    def __init__(self, path_to_weapons_data: str, path_to_descriptions_file: str, mode_name: str):
         self.weapon_data_cache = self.create_weapons_cache(path_to_weapons_data)
         self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)
+        self.mode_name = mode_name
 
     def __call__(self, path_to_weapon_file: str) -> Weapon:
         weapon_data = self.get_weapon_data(path_to_weapon_file)
+        if not weapon_data:
+            return None
         weapon = self.create_weapon(weapon_data)
         return weapon
 
@@ -39,11 +42,13 @@ class WeaponsParser:
         weapon_id = weapon_data_from_weapon_file['weapon_id']
         weapon_description = self.descriptions.get(weapon_id, '')
         weapon_data_from_csv = self.get_weapon_data_from_csv(weapon_id)
+        if not weapon_data_from_csv:
+            return None
         weapon_data = {**weapon_data_from_csv, **weapon_data_from_weapon_file, 'description': weapon_description}
         return weapon_data
 
     def get_weapon_data_from_csv(self, weapon_id: str) -> dict:
-        weapon_data = self.weapon_data_cache[weapon_id]
+        weapon_data = self.weapon_data_cache.get(weapon_id, None)
         return weapon_data
 
     def get_weapon_data_from_weapon_file(self, path_to_file: str) -> dict:
@@ -54,8 +59,10 @@ class WeaponsParser:
         weapon_data['spec_class'] = weapon_json['specClass']
         weapon_data['type'] = weapon_json['type']
         weapon_data['size'] = weapon_json['size']
-        weapon_data['turret_sprite'] = weapon_json.get('turretSprite', '')
-        weapon_data['hardpoint_sprite'] = weapon_json.get('hardpointSprite', '')
+        turret_spite = weapon_json.get('turretSprite', None)
+        weapon_data['turret_sprite'] = ('/' + self.mode_name + '/' + turret_spite) if turret_spite else ''
+        hardpoint_sprite = weapon_json.get('hardpointSprite', None)
+        weapon_data['hardpoint_sprite'] = ('/' + self.mode_name + '/' + hardpoint_sprite) if hardpoint_sprite else ''
         autocharge = weapon_json.get('autocharge', False)
         weapon_data['autocharge'] = True if autocharge else False
         req_full_charge = weapon_json.get('requiresFullCharge', False)
@@ -85,6 +92,7 @@ class WeaponsParser:
             turret_sprite = weapon_data['turret_sprite'],
             proj_speed = weapon_data['proj speed'] if weapon_data['proj speed'] else 0,
             weapon_type = weapon_data['type'],
-            description = weapon_data['description']
+            description = weapon_data['description'],
+            mod_name = self.mode_name
         )
         return weapon

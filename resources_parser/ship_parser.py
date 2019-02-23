@@ -1,14 +1,16 @@
 import json
 import csv
 from models import Ship, WeaponSlot, Weapon
+from json_cleaner.json_cleaner import json_load_light
 
 
 class ShipsParser:
     ignored_hulls = ['module', 'remnant', 'station', 'derelict', 'platform']
 
-    def __init__(self, path_to_ships_data: str, path_to_descriptions_file):
+    def __init__(self, path_to_ships_data: str, path_to_descriptions_file: str, mod_name: str):
         self.ships_data_cache = self.create_ships_cache(path_to_ships_data)
         self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)
+        self.mod_name = mod_name
 
     def __call__(self, path_to_ship_file: str) -> Ship:
         ship_data = self.get_ship_data(path_to_ship_file)
@@ -57,7 +59,8 @@ class ShipsParser:
 
     def get_ship_data_from_ship_file(self, path_to_ship_file: str) -> dict:
         with open(path_to_ship_file) as ship_file:
-            ship_json = json.load(ship_file)
+            ship_cleaned = json_load_light(path_to_ship_file)
+            ship_json = json.loads(ship_cleaned)
         ship_data = {}
         ship_data['ship_name'] = ship_json['hullName']
         ship_data['sprite_name'] = ship_json['spriteName']
@@ -87,7 +90,7 @@ class ShipsParser:
                             slot_type = weapon_slot['type'],
                             location = ','.join([str(coord) for coord in weapon_slot['locations']]),
                             ship_name = ship_name)
-        if weapon_slot['type'] == 'BUILT_IN':
+        if weapon_slot['type'] == 'BUILT_IN' and weapon_slot['mount'] != 'HIDDEN':
             weapon_id = built_in_weapons[weapon_slot['id']]
             weapon.weapon = weapon_id
         return weapon
@@ -128,7 +131,8 @@ class ShipsParser:
             shield_type = ship_data['shield type'] if ship_data['shield type'] else 'none',
             shield_upkeep = ship_data['shield upkeep'] if ship_data['shield upkeep'] else 0,
             supplies_month = ship_data['supplies/mo'] if ship_data['supplies/mo'] else 0,
-            description = ship_data['description']
+            description = ship_data['description'],
+            mod_name = self.mod_name
         )
         if ship_data['weapon_slots']:
             built_in_weapons = ship_data.get('built_in_weapons', {})

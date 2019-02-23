@@ -16,7 +16,7 @@ class Ship(Base):
     height = Column(Float)
     hull_size = Column(String(50))
     style = Column(String(50))
-    center = Column(String(10))
+    center = Column(String(15))
     weapon_slots = relationship("WeaponSlot", cascade="save-update, merge, delete")
     armor_rating = Column(Float)
     acceleration = Column(Float)
@@ -40,6 +40,7 @@ class Ship(Base):
     shield_upkeep = Column(Float)
     supplies_month = Column(Float)
     description = Column(Text)
+    mod_name = Column(String(50))
 
     def __repr__(self):
         return "<Ship(ship_name={})>".format(self.ship_name)
@@ -49,7 +50,7 @@ class WeaponSlot(Base):
     __tablename__ = 'weapon_slots'
 
     id = Column(Integer, primary_key=True)
-    slot_id = Column(String(10))
+    slot_id = Column(String(30))
     angle = Column(Float)
     arc = Column(Float)
     mount = Column(String(10))
@@ -80,7 +81,7 @@ class Weapon(Base):
     energy_second = Column(Float)
     energy_shot = Column(Float)
     hardpoint_sprite = Column(String(100))
-    weapon_range = Column(Integer)
+    weapon_range = Column(Float)
     size = Column(String(10))
     spec_class = Column(String(15))
     turn_rate = Column(Integer)
@@ -88,6 +89,7 @@ class Weapon(Base):
     proj_speed = Column(Integer)
     weapon_type = Column(String(15))
     description = Column(Text)
+    mod_name = Column(String(50))
 
     def __repr__(self):
         return "<Weapon(id={}, name={})>".format(self.weapon_id, self.weapon_name)
