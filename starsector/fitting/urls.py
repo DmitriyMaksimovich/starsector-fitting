@@ -4,11 +4,11 @@ from fitting import views
 
 
 urlpatterns = [
-    path('ship/', views.ShipsList.as_view(), name='ships_list'),
-    path('ship/<pk>/', views.ShipView.as_view(), name='ship_detail'),
-    path('ship/<str:ship_name>/<str:field>/', views.ship_field_detail, name='ship_field_detail'),
-    path('weapon/', views.WeaponsList.as_view(), name='weapons_list'),
-    path('weapon/<pk>/', views.WeaponView.as_view(), name='weapon_detail'),
+    path('api/ship/', views.ShipsList.as_view(), name='ships_list'),
+    path('api/ship/<pk>/', views.ShipView.as_view(), name='ship_detail'),
+    path('api/ship/<str:ship_name>/<str:field>/', views.ship_field_detail, name='ship_field_detail'),
+    path('api/weapon/', views.WeaponsList.as_view(), name='weapons_list'),
+    path('api/weapon/<pk>/', views.WeaponView.as_view(), name='weapon_detail'),
 ]
 
 

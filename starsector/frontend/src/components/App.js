@@ -5,8 +5,8 @@ import Table from "./Table";
 
 
 const App = () => (
-        <DataProvider endpoint="api/ships/"
-    render={data => <Table data={data} />} />
+        <DataProvider endpoint="/api/ship/"
+                      render={data => <Table data={data} />} />
 );
 
 const wrapper = document.getElementById("app");
