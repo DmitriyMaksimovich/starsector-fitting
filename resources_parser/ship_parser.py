@@ -2,6 +2,7 @@ import json
 import csv
 from models import Ship, WeaponSlot, Weapon
 from json_cleaner.json_cleaner import json_load_light
+from styles import STYLES
 
 
 class ShipsParser:
@@ -69,7 +70,7 @@ class ShipsParser:
         ship_data['height'] = int(ship_json['height'])
         ship_data['hull_id'] = ship_json['hullId']
         ship_data['hull_size'] = ship_json['hullSize']
-        ship_data['style'] = ship_json['style']
+        ship_data['style'] = STYLES[ship_json['style']]
         ship_data['center'] = ','. join([str(coord) for coord in ship_json['center']])
         ship_data['built_in_mods'] = ship_json.get('builtInMods', None)
         ship_data['built_in_wings'] = ship_json.get('builtInWings', None)

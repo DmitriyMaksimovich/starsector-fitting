@@ -1,0 +1,15 @@
+STYLES = {
+    'ARKGNEISIS_MID': 'Arkgneisis Midline',
+    'ARKGNEISIS_HIGH': 'Arkgneisis High',
+    'SHADOW_TECH': 'Shadowyards',
+    'MIDLINE': 'Vanilla Midline',
+    'SRD_MTF_TECH': 'Sylphon MTF',
+    'SCYHULL': 'SKY Nation',
+    'LOW_TECH': 'Vanilla Low',
+    'HIGH_TECH': 'Vanilla High',
+    'DA_WANZER': 'Diable Avionics',
+    'SRD_TECH': 'Sylphon',
+    'KADUR_TECH': 'Kadur Remnant',
+    'SRD_RH_TECH': 'Sylphon RH',
+    'SANGUINARY_TECH': 'Sanguinary',
+}

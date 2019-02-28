@@ -9,8 +9,8 @@ Base = declarative_base()
 class Ship(Base):
     __tablename__ = 'ships'
 
-    ship_name = Column(String(100), primary_key=True)
-    hull_id = Column(String(100))
+    ship_name = Column(String(100))
+    hull_id = Column(String(100), primary_key=True)
     sprite_name = Column(String(150))
     width = Column(Float)
     height = Column(Float)
@@ -57,7 +57,7 @@ class WeaponSlot(Base):
     size = Column(String(15))
     slot_type = Column(String(15))
     location = Column(String(80))
-    ship_name = Column(String(100), ForeignKey('ships.ship_name'))
+    ship_name = Column(String(100), ForeignKey('ships.hull_id'))
     weapon = Column(String(50), ForeignKey('weapons.weapon_id'), nullable=True)
 
     def __repr__(self):
