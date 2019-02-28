@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from fitting.models import Ships, WeaponSlots, Weapons
+from fitting.models import Ships, WeaponSlots, Weapons, Fitting
 
 
 class WeaponSerializer(serializers.ModelSerializer):
@@ -94,3 +94,9 @@ class ShipSerializer(serializers.ModelSerializer):
             'description',
             'mod_name'
         ]
+
+
+class FittingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fitting
+        fields = '__all__'

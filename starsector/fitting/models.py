@@ -1,9 +1,14 @@
 from django.db import models
+from django.contrib.postgres.fields import JSONField
+
+
+class HullMod(models.Model):
+    mod_name = models.CharField(max_length=50, primary_key=True)
 
 
 class Ships(models.Model):
-    ship_name = models.CharField(primary_key=True, max_length=100)
-    hull_id = models.CharField(max_length=100, blank=True, null=True)
+    ship_name = models.CharField(max_length=100)
+    hull_id = models.CharField(primary_key=True, max_length=100)
     sprite_name = models.CharField(max_length=150, blank=True, null=True)
     width = models.FloatField(blank=True, null=True)
     height = models.FloatField(blank=True, null=True)
@@ -58,7 +63,7 @@ class Weapons(models.Model):
     energy_second = models.FloatField(blank=True, null=True)
     energy_shot = models.FloatField(blank=True, null=True)
     hardpoint_sprite = models.CharField(max_length=100, blank=True, null=True)
-    weapon_range = models.IntegerField(blank=True, null=True)
+    weapon_range = models.FloatField(blank=True, null=True)
     size = models.CharField(max_length=10, blank=True, null=True)
     spec_class = models.CharField(max_length=15, blank=True, null=True)
     turn_rate = models.IntegerField(blank=True, null=True)
@@ -95,3 +100,17 @@ class WeaponSlots(models.Model):
 
     def __str__(self):
         return "WeaponSlot {} for {}".format(self.pk, self.ship_name)
+
+
+class Fitting(models.Model):
+    variant_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    flux_capacitors = models.IntegerField()
+    flux_vents = models.IntegerField()
+    hull_id = models.ForeignKey(Ships, db_column='hull_id', on_delete=models.CASCADE)
+    weapon_groups = JSONField()
+    goal_variant = models.BooleanField(default=True)
+    hull_mods = models.ManyToManyField(HullMod, blank=True, related_name='fit')
+
+    def __str__(self):
+        return "Fit {}".format(self.variant_id)

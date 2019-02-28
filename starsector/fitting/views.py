@@ -1,9 +1,9 @@
-from rest_framework import generics, pagination
+from rest_framework import generics, pagination, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_404_NOT_FOUND
-from fitting.models import Ships, Weapons
-from fitting.serializers import ShipSerializer, WeaponSerializer
+from fitting.models import Ships, Weapons, Fitting
+from fitting.serializers import ShipSerializer, WeaponSerializer, FittingSerializer
 
 
 class ShipsPaginator(pagination.PageNumberPagination):
@@ -41,18 +41,6 @@ class ShipView(generics.RetrieveAPIView):
     serializer_class = ShipSerializer
 
 
-@api_view()
-def ship_field_detail(request, ship_name, field):
-    try:
-        ship = Ships.objects.get(ship_name=ship_name)
-        field_value = getattr(ship, field)
-    except (Ships.DoesNotExist, AttributeError):
-        return Response(status=HTTP_404_NOT_FOUND)
-
-    if request.method == "GET":
-        return Response({field: field_value})
-
-
 class WeaponsList(generics.ListAPIView):
     serializer_class = WeaponSerializer
     pagination_class = WeaponsPaginator
@@ -74,3 +62,23 @@ class WeaponsList(generics.ListAPIView):
 class WeaponView(generics.RetrieveAPIView):
     queryset = Weapons.objects.all()
     serializer_class = WeaponSerializer
+
+
+@api_view()
+def ship_filters_view(request, filter):
+    if filter not in ('hull_size', 'style'):
+        return Response(status=HTTP_404_NOT_FOUND)
+    queryset = Ships.objects.distinct(filter)
+    values = [getattr(row, filter) for row in queryset]
+    return Response({'count': len(values),
+                     'values': values})
+
+
+@api_view()
+def weapon_filters_view(request, filter):
+    if filter not in ('weapon_type', 'size', 'mod_name'):
+        return Response(status=HTTP_404_NOT_FOUND)
+    queryset = Weapons.objects.distinct(filter)
+    values = [getattr(row, filter) for row in queryset]
+    return Response({'count': len(values),
+                     'values': values})
