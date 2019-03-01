@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import generics, pagination, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -35,10 +37,18 @@ class ShipsList(generics.ListAPIView):
             queryset = queryset.filter(mod_name=mod)
         return queryset
 
+    @method_decorator(cache_page(60*60*24))
+    def dispatch(self, *args, **kwargs):
+        return super(ShipsList, self).dispatch(*args, **kwargs)
+
 
 class ShipView(generics.RetrieveAPIView):
     queryset = Ships.objects.all()
     serializer_class = ShipSerializer
+
+    @method_decorator(cache_page(60*60*24))
+    def dispatch(self, *args, **kwargs):
+        return super(ShipView, self).dispatch(*args, **kwargs)
 
 
 class WeaponsList(generics.ListAPIView):
@@ -58,12 +68,21 @@ class WeaponsList(generics.ListAPIView):
             queryset = queryset.filter(mod_name=mod)
         return queryset
 
+    @method_decorator(cache_page(60*60*24))
+    def dispatch(self, *args, **kwargs):
+        return super(WeaponsList, self).dispatch(*args, **kwargs)
+
 
 class WeaponView(generics.RetrieveAPIView):
     queryset = Weapons.objects.all()
     serializer_class = WeaponSerializer
 
+    @method_decorator(cache_page(60*60*24))
+    def dispatch(self, *args, **kwargs):
+        return super(WeaponView, self).dispatch(*args, **kwargs)
 
+
+@cache_page(60*60*24)
 @api_view()
 def ship_filters_view(request, filter):
     if filter not in ('hull_size', 'style'):
@@ -74,6 +93,7 @@ def ship_filters_view(request, filter):
                      'values': values})
 
 
+@cache_page(60*60*24)
 @api_view()
 def weapon_filters_view(request, filter):
     if filter not in ('weapon_type', 'size', 'mod_name'):
