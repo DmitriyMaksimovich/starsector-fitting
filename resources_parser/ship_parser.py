@@ -3,11 +3,10 @@ import csv
 from models import Ship, WeaponSlot, Weapon
 from json_cleaner.json_cleaner import json_load_light
 from styles import STYLES
+from ignore import ignored_hulls, ignored_names
 
 
 class ShipsParser:
-    ignored_hulls = ['module', 'remnant', 'station', 'derelict', 'platform']
-
     def __init__(self, path_to_ships_data: str, path_to_descriptions_file: str, mod_name: str):
         self.ships_data_cache = self.create_ships_cache(path_to_ships_data)
         self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)
@@ -15,10 +14,23 @@ class ShipsParser:
 
     def __call__(self, path_to_ship_file: str) -> Ship:
         ship_data = self.get_ship_data(path_to_ship_file)
-        if not ship_data:
-            return False
+        # Проверка на то, является ли этот ship файл файлом корабля
+        if not self.is_ship(ship_data):
+            return None
         ship = self.create_ship(ship_data)
         return ship
+
+    def is_ship(self, ship_data):
+        ship_name = ship_data['ship_name']
+        if ship_name in ignored_names:
+            return False
+        hull_id = ship_data['hull_id']
+        for hull in ignored_hulls:
+            if hull_id.startswith(hull):
+                return False
+        if not ship_data.get('hitpoints'):
+            return False
+        return True
 
     def create_ships_cache(self, path_to_ships_data: str) -> dict:
         ships_data_cache = {}
@@ -43,20 +55,25 @@ class ShipsParser:
     def get_ship_data(self, path_to_ship_file: str) -> dict:
         ship_data_from_ship_file = self.get_ship_data_from_ship_file(path_to_ship_file)
         hull_id = ship_data_from_ship_file['hull_id']
-        # stations and modules is not ships
-        for hull in self.ignored_hulls:
-            if hull_id.startswith(hull):
-                return False
         ship_data_from_csv = self.get_ship_data_from_csv(hull_id)
-        if not ship_data_from_csv:
-            return False
-        ship_description = self.descriptions.get(hull_id, '')
+        ship_description = self.get_ship_description(hull_id)
         ship_data = {**ship_data_from_ship_file, **ship_data_from_csv, 'description': ship_description}
         return ship_data
 
     def get_ship_data_from_csv(self, hull_id: str) -> dict:
-        ship_data = self.ships_data_cache.get(hull_id, False)
+        ship_data = self.ships_data_cache.get(hull_id, {})
         return ship_data
+
+    def get_ship_description(self, hull_id: str):
+        ship_description = self.descriptions.get(hull_id, '')
+        return ship_description
+
+    def get_ship_style(self, ship_json):
+        if self.mod_name == 'Base':
+            ship_style = STYLES[ship_json['style']]
+        else:
+            ship_style = STYLES[self.mod_name]
+        return ship_style
 
     def get_ship_data_from_ship_file(self, path_to_ship_file: str) -> dict:
         with open(path_to_ship_file) as ship_file:
@@ -64,19 +81,17 @@ class ShipsParser:
             ship_json = json.loads(ship_cleaned)
         ship_data = {}
         ship_data['ship_name'] = ship_json['hullName']
-        ship_sprite = '/' + self.mod_name + '/' + ship_json['spriteName']
-        ship_data['sprite_name'] = ship_sprite
+        ship_data['sprite_name'] = '/' + self.mod_name + '/' + ship_json['spriteName']
         ship_data['width'] = int(ship_json['width'])
         ship_data['height'] = int(ship_json['height'])
         ship_data['hull_id'] = ship_json['hullId']
         ship_data['hull_size'] = ship_json['hullSize']
-        ship_data['style'] = STYLES[ship_json['style']]
+        ship_data['style'] = self.get_ship_style(ship_json)
         ship_data['center'] = ','. join([str(coord) for coord in ship_json['center']])
         ship_data['built_in_mods'] = ship_json.get('builtInMods', None)
         ship_data['built_in_wings'] = ship_json.get('builtInWings', None)
-        ship_data['built_in_weapons'] = ship_json.get('builtInWeapons', None)
-        ship_data['weapon_slots'] = ship_json.get('weaponSlots', None)
         ship_data['built_in_weapons'] = ship_json.get('builtInWeapons', {})
+        ship_data['weapon_slots'] = ship_json.get('weaponSlots', None)
         return ship_data
 
     def get_weapon_by_id(self, weapon_id: str) -> Weapon:
@@ -84,7 +99,7 @@ class ShipsParser:
         return weapon
 
     def create_weapon_slot(self, weapon_slot: dict, ship_name: str, built_in_weapons: dict) -> WeaponSlot:
-        weapon = WeaponSlot(slot_id = weapon_slot['id'],
+        weapon_slot_obj = WeaponSlot(slot_id = weapon_slot['id'],
                             angle = weapon_slot['angle'],
                             arc = weapon_slot['arc'],
                             mount = weapon_slot['mount'],
@@ -94,8 +109,8 @@ class ShipsParser:
                             ship_name = ship_name)
         if weapon_slot['type'] == 'BUILT_IN' and weapon_slot['mount'] != 'HIDDEN':
             weapon_id = built_in_weapons[weapon_slot['id']]
-            weapon.weapon = weapon_id
-        return weapon
+            weapon_slot_obj.weapon = weapon_id
+        return weapon_slot_obj
 
     def create_ship(self, ship_data: dict) -> Ship:
         """

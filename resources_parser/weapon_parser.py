@@ -12,7 +12,7 @@ class WeaponsParser:
 
     def __call__(self, path_to_weapon_file: str) -> Weapon:
         weapon_data = self.get_weapon_data(path_to_weapon_file)
-        if not weapon_data:
+        if not weapon_data.get('name'):
             return None
         weapon = self.create_weapon(weapon_data)
         return weapon
@@ -42,13 +42,11 @@ class WeaponsParser:
         weapon_id = weapon_data_from_weapon_file['weapon_id']
         weapon_description = self.descriptions.get(weapon_id, '')
         weapon_data_from_csv = self.get_weapon_data_from_csv(weapon_id)
-        if not weapon_data_from_csv:
-            return None
         weapon_data = {**weapon_data_from_csv, **weapon_data_from_weapon_file, 'description': weapon_description}
         return weapon_data
 
     def get_weapon_data_from_csv(self, weapon_id: str) -> dict:
-        weapon_data = self.weapon_data_cache.get(weapon_id, None)
+        weapon_data = self.weapon_data_cache.get(weapon_id, {})
         return weapon_data
 
     def get_weapon_data_from_weapon_file(self, path_to_file: str) -> dict:

@@ -9,6 +9,7 @@ from models import create_models, Ship, Weapon
 from ship_parser import ShipsParser
 from weapon_parser import WeaponsParser
 from json_cleaner import json_cleaner
+from ignore import ignored_mods
 
 
 HULLS_SUBFOLDER = '/data/hulls/'
@@ -68,13 +69,15 @@ def copy_weapon_sprites_to_static(weapon: Weapon, path_to_game: str):
 
 
 def get_mods_folders(path_to_game: str) -> dict:
-    mods = {'vanilla': path_to_game}
+    mods = {'Base': path_to_game}
     mods_folders = [path_to_game + '/mods/' + f for f in os.listdir(path_to_game + '/mods/') if os.path.isdir(path_to_game + '/mods/' + f)]
     for mod in mods_folders:
         if 'mod_info.json' in os.listdir(mod):
             path_to_mod_info = mod + '/mod_info.json'
             mod_info_json = json.loads(json_cleaner.json_load(path_to_mod_info))
             mod_name = mod_info_json['name']
+            if mod_name in ignored_mods:
+                continue
             mods[mod_name] = mod
     return mods
 
