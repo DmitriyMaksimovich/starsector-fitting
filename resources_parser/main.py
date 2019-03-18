@@ -15,8 +15,10 @@ from ignore import ignored_mods
 HULLS_SUBFOLDER = '/data/hulls/'
 WEAPONS_SUBFOLDER = '/data/weapons/'
 DESCRIPTIONS_SUBFOLDER = '/data/strings/descriptions.csv'
-PATH_TO_STATIC = os.path.expanduser('~/Dev/starsector-fitting/starsector/fitting/static/fitting/')
-
+try:
+    PATH_TO_STATIC = sys.argv[1]
+except:
+    PATH_TO_STATIC = os.path.expanduser('~/Dev/starsector-fitting/starsector/fitting/static/fitting/')
 
 def insert_or_update_ship(ship: Ship, session) -> Ship:
     existing_ship = session.query(Ship).filter(Ship.ship_name == ship.ship_name).first()
