@@ -21,15 +21,17 @@ class ShipsParser:
         return ship
 
     def is_ship(self, ship_data):
+        if not ship_data:
+            return False
         ship_name = ship_data['ship_name']
         if ship_name in ignored_names:
+            return False
+        if not ship_data.get('name'):
             return False
         hull_id = ship_data['hull_id']
         for hull in ignored_hulls:
             if hull_id.startswith(hull):
                 return False
-        if not ship_data.get('hitpoints'):
-            return False
         return True
 
     def create_ships_cache(self, path_to_ships_data: str) -> dict:
@@ -56,6 +58,8 @@ class ShipsParser:
         ship_data_from_ship_file = self.get_ship_data_from_ship_file(path_to_ship_file)
         hull_id = ship_data_from_ship_file['hull_id']
         ship_data_from_csv = self.get_ship_data_from_csv(hull_id)
+        if not ship_data_from_csv:
+            return {}
         ship_description = self.get_ship_description(hull_id)
         ship_data = {**ship_data_from_ship_file, **ship_data_from_csv, 'description': ship_description}
         return ship_data

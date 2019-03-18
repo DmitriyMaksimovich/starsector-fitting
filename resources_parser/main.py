@@ -20,6 +20,7 @@ try:
 except:
     PATH_TO_STATIC = os.path.expanduser('~/Dev/starsector-fitting/starsector/fitting/static/fitting/')
 
+
 def insert_or_update_ship(ship: Ship, session) -> Ship:
     existing_ship = session.query(Ship).filter(Ship.ship_name == ship.ship_name).first()
     if not existing_ship:
