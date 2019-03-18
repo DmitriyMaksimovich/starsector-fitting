@@ -120,7 +120,7 @@ def parse_hull_files(path_to_game: str, mod_name: str) -> list:
 
 if __name__ == '__main__':
     try:
-        path_to_game = sys.argv[1]
+        path_to_game = sys.argv[2]
     except IndexError:
         path_to_game = os.path.expanduser('~/Starsector')
 
