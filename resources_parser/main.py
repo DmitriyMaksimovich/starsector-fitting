@@ -155,12 +155,14 @@ if __name__ == '__main__':
             for weapon in weapons:
                 copy_weapon_sprites_to_static(weapon, mods[mod])
                 _ = insert_or_update_weapon(weapon, session)
+            session.commit()
             ships = parse_hull_files(mods[mod], mod)
             for ship in ships:
                 copy_ship_sprite_to_static(ship, mods[mod])
                 _ = insert_or_update_ship(ship, session)
+            session.commit()
             ship_skins = parse_skin_files(mods[mod], mod, session)
             for ship_skin in ship_skins:
                 copy_ship_sprite_to_static(ship_skin, mods[mod])
                 _ = insert_or_update_ship(ship_skin, session)
-        session.commit()
+            session.commit()
