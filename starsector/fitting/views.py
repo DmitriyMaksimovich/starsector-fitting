@@ -85,6 +85,16 @@ class FitingsView(generics.ListAPIView):
         return queryset
 
 
+class SearchShipView(generics.ListAPIView):
+    serializer_class = ShipSerializer
+    pagination_class = ShipsPaginator
+
+    def get_queryset(self):
+        ship_name = self.kwargs['ship_name']
+        queryset = Ships.objects.filter(ship_name__icontains=ship_name)
+        return queryset
+
+
 @api_view()
 def ship_filters_view(request, filter):
     if filter not in ('hull_size', 'style'):
