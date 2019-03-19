@@ -4,7 +4,7 @@ from json_cleaner.json_cleaner import json_load
 from models import Weapon
 
 
-class WeaponsParser:
+class WeaponParser:
     def __init__(self, path_to_weapons_data: str, path_to_descriptions_file: str, mode_name: str):
         self.weapon_data_cache = self.create_weapons_cache(path_to_weapons_data)
         self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)

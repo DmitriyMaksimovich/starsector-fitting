@@ -6,13 +6,15 @@ import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import create_models, Ship, Weapon
-from ship_parser import ShipsParser
-from weapon_parser import WeaponsParser
+from ship_parser import ShipParser
+from weapon_parser import WeaponParser
+from skin_parser import SkinParser
 from json_cleaner import json_cleaner
 from ignore import ignored_mods
 
 
 HULLS_SUBFOLDER = '/data/hulls/'
+SKINS_SUBFOLDER = HULLS_SUBFOLDER + 'skins/'
 WEAPONS_SUBFOLDER = '/data/weapons/'
 DESCRIPTIONS_SUBFOLDER = '/data/strings/descriptions.csv'
 try:
@@ -92,7 +94,7 @@ def parse_weapon_files(path_to_game: str, mod_name: str) -> list:
         return weapons
     weapon_csv = path_to_game + '/data/weapons/weapon_data.csv'
     path_to_descriptions = path_to_game + DESCRIPTIONS_SUBFOLDER
-    weapon_parser = WeaponsParser(weapon_csv, path_to_descriptions, mod_name)
+    weapon_parser = WeaponParser(weapon_csv, path_to_descriptions, mod_name)
     weapon_files = [os.path.join(path_to_weapons, f) for f in os.listdir(path_to_weapons) if os.path.isfile(os.path.join(path_to_weapons, f)) and f.endswith('.wpn')]
     for weapon_file in weapon_files:
         weapon = weapon_parser(weapon_file)
@@ -109,7 +111,7 @@ def parse_hull_files(path_to_game: str, mod_name: str) -> list:
         return ships
     ships_csv = path_to_game + '/data/hulls/ship_data.csv'
     path_to_descriptions = path_to_game + DESCRIPTIONS_SUBFOLDER
-    ships_parser = ShipsParser(ships_csv, path_to_descriptions, mod_name)
+    ships_parser = ShipParser(ships_csv, path_to_descriptions, mod_name)
     ship_files = [os.path.join(path_to_hulls, f) for f in os.listdir(path_to_hulls) if os.path.isfile(os.path.join(path_to_hulls, f)) and f.endswith('.ship')]
     for ship_file in ship_files:
         ship = ships_parser(ship_file)
@@ -117,6 +119,21 @@ def parse_hull_files(path_to_game: str, mod_name: str) -> list:
             continue
         ships.append(ship)
     return ships
+
+
+def parse_skin_files(path_to_game: str, mod_name, session) -> list:
+    ship_skins = []
+    path_to_skins = path_to_game + SKINS_SUBFOLDER
+    if not os.path.isdir(path_to_skins):
+        return ship_skins
+    skin_parser = SkinParser(session, mod_name)
+    skin_files = [os.path.join(path_to_skins, f) for f in os.listdir(path_to_skins) if os.path.isfile(os.path.join(path_to_skins, f)) and f.endswith('.skin')]
+    for skin_file in skin_files:
+        ship_skin = skin_parser(skin_file)
+        if not ship_skin:
+            continue
+        ship_skins.append(ship_skin)
+    return ship_skins
 
 
 if __name__ == '__main__':
@@ -142,4 +159,8 @@ if __name__ == '__main__':
             for ship in ships:
                 copy_ship_sprite_to_static(ship, mods[mod])
                 _ = insert_or_update_ship(ship, session)
+            ship_skins = parse_skin_files(mods[mod], mod, session)
+            for ship_skin in ship_skins:
+                copy_ship_sprite_to_static(ship_skin, mods[mod])
+                _ = insert_or_update_ship(ship_skin, session)
         session.commit()

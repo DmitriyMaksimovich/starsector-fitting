@@ -1,20 +1,19 @@
 import json
 import csv
 from models import Ship, WeaponSlot, Weapon
+from ship_cache import ShipsCache
 from json_cleaner.json_cleaner import json_load_light
 from styles import STYLES
 from ignore import ignored_hulls, ignored_names
 
 
-class ShipsParser:
+class ShipParser(ShipsCache):
     def __init__(self, path_to_ships_data: str, path_to_descriptions_file: str, mod_name: str):
-        self.ships_data_cache = self.create_ships_cache(path_to_ships_data)
-        self.descriptions = self.create_descriptions_cache(path_to_descriptions_file)
         self.mod_name = mod_name
+        super(ShipParser, self).__init__(path_to_ships_data, path_to_descriptions_file)
 
     def __call__(self, path_to_ship_file: str) -> Ship:
         ship_data = self.get_ship_data(path_to_ship_file)
-        # Проверка на то, является ли этот ship файл файлом корабля
         if not self.is_ship(ship_data):
             return None
         ship = self.create_ship(ship_data)
@@ -33,26 +32,6 @@ class ShipsParser:
             if hull_id.startswith(hull):
                 return False
         return True
-
-    def create_ships_cache(self, path_to_ships_data: str) -> dict:
-        ships_data_cache = {}
-        with open(path_to_ships_data) as ships_data_file:
-            ships_data = csv.DictReader(ships_data_file)
-            for line in ships_data:
-                hull_id = line['id']
-                ships_data_cache[hull_id] = line
-        return ships_data_cache
-
-    def create_descriptions_cache(self, path_to_descriptions_file: str) -> dict:
-        descriptions = {}
-        with open(path_to_descriptions_file) as descriptions_file:
-            descriptions_data = csv.DictReader(descriptions_file)
-            for line in descriptions_data:
-                line_type = line['type']
-                if line_type == 'SHIP':
-                    hull_id = line['id']
-                    descriptions[hull_id] = line['text1']
-        return descriptions
 
     def get_ship_data(self, path_to_ship_file: str) -> dict:
         ship_data_from_ship_file = self.get_ship_data_from_ship_file(path_to_ship_file)
@@ -80,9 +59,8 @@ class ShipsParser:
         return ship_style
 
     def get_ship_data_from_ship_file(self, path_to_ship_file: str) -> dict:
-        with open(path_to_ship_file) as ship_file:
-            ship_cleaned = json_load_light(path_to_ship_file)
-            ship_json = json.loads(ship_cleaned)
+        ship_cleaned = json_load_light(path_to_ship_file)
+        ship_json = json.loads(ship_cleaned)
         ship_data = {}
         ship_data['ship_name'] = ship_json['hullName']
         ship_data['sprite_name'] = '/' + self.mod_name + '/' + ship_json['spriteName']
@@ -98,19 +76,15 @@ class ShipsParser:
         ship_data['weapon_slots'] = ship_json.get('weaponSlots', None)
         return ship_data
 
-    def get_weapon_by_id(self, weapon_id: str) -> Weapon:
-        weapon = self.session.query(Weapon).filter_by(weapon_id=weapon_id).first()
-        return weapon
-
     def create_weapon_slot(self, weapon_slot: dict, ship_name: str, built_in_weapons: dict) -> WeaponSlot:
         weapon_slot_obj = WeaponSlot(slot_id = weapon_slot['id'],
-                            angle = weapon_slot['angle'],
-                            arc = weapon_slot['arc'],
-                            mount = weapon_slot['mount'],
-                            size = weapon_slot['size'],
-                            slot_type = weapon_slot['type'],
-                            location = ','.join([str(coord) for coord in weapon_slot['locations']]),
-                            ship_name = ship_name)
+            angle = weapon_slot['angle'],
+            arc = weapon_slot['arc'],
+            mount = weapon_slot['mount'],
+            size = weapon_slot['size'],
+            slot_type = weapon_slot['type'],
+            location = ','.join([str(coord) for coord in weapon_slot['locations']]),
+            ship_name = ship_name)
         if weapon_slot['type'] == 'BUILT_IN' and weapon_slot['mount'] != 'HIDDEN':
             weapon_id = built_in_weapons[weapon_slot['id']]
             weapon_slot_obj.weapon = weapon_id
