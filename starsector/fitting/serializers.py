@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from fitting.models import Ships, WeaponSlots, Weapons, Fitting
+from fitting.models import Ships, Weapons, Fitting
 
 
 class WeaponSerializer(serializers.ModelSerializer):
@@ -33,29 +33,8 @@ class WeaponSerializer(serializers.ModelSerializer):
         ]
 
 
-class WeaponSlotsSerializer(serializers.ModelSerializer):
-    weapon = WeaponSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = WeaponSlots
-        fields = '__all__'
-        read_only_fields = [
-            'id',
-            'slot_id',
-            'angle',
-            'arc',
-            'mount',
-            'size',
-            'slot_type',
-            'location',
-            'ship_name',
-            'weapon'
-        ]
-
 
 class ShipSerializer(serializers.ModelSerializer):
-    weapon_slots = WeaponSlotsSerializer(many=True, read_only=True)
-
     class Meta:
         model = Ships
         ordering = ('ship_name',)
@@ -78,11 +57,13 @@ class ShipSerializer(serializers.ModelSerializer):
             'flux_dissipation',
             'fuel',
             'fuel_ly',
+            'fighter_bays',
             'hitpoints',
             'mass',
             'max_crew',
             'max_flux',
             'max_speed',
+            'max_burn',
             'max_turn_rate',
             'min_crew',
             'ordnance_points',
@@ -91,8 +72,9 @@ class ShipSerializer(serializers.ModelSerializer):
             'shield_type',
             'shield_upkeep',
             'supplies_month',
-            'description',
-            'mod_name'
+            'mod_name',
+            'weapon_slots',
+            'description'
         ]
 
 

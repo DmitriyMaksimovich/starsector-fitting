@@ -28,8 +28,6 @@ def insert_or_update_ship(ship: Ship, session) -> Ship:
     if not existing_ship:
         session.add(ship)
     else:
-        for weapon_slots in existing_ship.weapon_slots:
-            session.delete(weapon_slots)
         session.merge(ship)
     return ship
 

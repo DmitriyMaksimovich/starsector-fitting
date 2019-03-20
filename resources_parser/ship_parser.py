@@ -1,6 +1,6 @@
 import json
 import csv
-from models import Ship, WeaponSlot, Weapon
+from models import Ship, Weapon
 from ship_cache import ShipsCache
 from json_cleaner.json_cleaner import json_load_light
 from styles import STYLES
@@ -72,23 +72,19 @@ class ShipParser(ShipsCache):
         ship_data['center'] = ','. join([str(coord) for coord in ship_json['center']])
         ship_data['built_in_mods'] = ship_json.get('builtInMods', None)
         ship_data['built_in_wings'] = ship_json.get('builtInWings', None)
-        ship_data['built_in_weapons'] = ship_json.get('builtInWeapons', {})
-        ship_data['weapon_slots'] = ship_json.get('weaponSlots', None)
+        built_in_weapons = ship_json.get('builtInWeapons', {})
+        weapon_slots = ship_json.get('weaponSlots', [])
+        ship_data['weapon_slots'] = self.create_weapon_slots_dict(weapon_slots, built_in_weapons)
         return ship_data
 
-    def create_weapon_slot(self, weapon_slot: dict, ship_name: str, built_in_weapons: dict) -> WeaponSlot:
-        weapon_slot_obj = WeaponSlot(slot_id = weapon_slot['id'],
-            angle = weapon_slot['angle'],
-            arc = weapon_slot['arc'],
-            mount = weapon_slot['mount'],
-            size = weapon_slot['size'],
-            slot_type = weapon_slot['type'],
-            location = ','.join([str(coord) for coord in weapon_slot['locations']]),
-            ship_name = ship_name)
-        if weapon_slot['type'] == 'BUILT_IN' and weapon_slot['mount'] != 'HIDDEN':
-            weapon_id = built_in_weapons[weapon_slot['id']]
-            weapon_slot_obj.weapon = weapon_id
-        return weapon_slot_obj
+    def create_weapon_slots_dict(self, weapon_slots_list: list, built_in_weapons: dict) -> dict:
+        weapon_slots = {}
+        for weapon_slot in weapon_slots_list:
+            slot_id = weapon_slot.pop('id')
+            weapon_slots[slot_id] = weapon_slot
+        for slot_id in built_in_weapons:
+            weapon_slots[slot_id]['weapon_id'] = built_in_weapons[slot_id]
+        return weapon_slots
 
     def create_ship(self, ship_data: dict) -> Ship:
         """
@@ -107,7 +103,8 @@ class ShipParser(ShipsCache):
             center = ship_data['center'],
             armor_rating = ship_data['armor rating'],
             acceleration = ship_data['acceleration'],
-            field_8_6_5_4 = ship_data['8/6/5/4%'] if ship_data['8/6/5/4%'] else 0,
+            fighter_bays = ship_data['fighter bays'] if ship_data['fighter bays'] else 0,
+            max_burn = ship_data['max burn'] if ship_data['max burn'] else 0,
             cargo = ship_data['cargo'] if ship_data['cargo'] else 0,
             deceleration = ship_data['deceleration'],
             flux_dissipation = ship_data['flux dissipation'],
@@ -126,12 +123,8 @@ class ShipParser(ShipsCache):
             shield_type = ship_data['shield type'] if ship_data['shield type'] else 'none',
             shield_upkeep = ship_data['shield upkeep'] if ship_data['shield upkeep'] else 0,
             supplies_month = ship_data['supplies/mo'] if ship_data['supplies/mo'] else 0,
+            weapon_slots = ship_data['weapon_slots'],
             description = ship_data['description'],
             mod_name = self.mod_name
         )
-        if ship_data['weapon_slots']:
-            built_in_weapons = ship_data.get('built_in_weapons', {})
-            for weapon_slot in ship_data['weapon_slots']:
-                weapon = self.create_weapon_slot(weapon_slot, ship.ship_name, built_in_weapons)
-                ship.weapon_slots.append(weapon)
         return ship

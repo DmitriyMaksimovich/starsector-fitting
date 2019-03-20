@@ -1,7 +1,7 @@
 import json
 from sqlalchemy.orm.session import make_transient
 from sqlalchemy import and_
-from models import Ship, WeaponSlot, Weapon
+from models import Ship, Weapon
 from json_cleaner.json_cleaner import json_load_skin
 
 
@@ -32,19 +32,13 @@ class SkinParser():
         if skin_data['OP']:
             ship.ordnance_points = skin_data['OP']
         ship.description = skin_data['description_prefix'] + '\n' + ship.description
-        for weapon_slot in skin_data['removed_weapon_slots']:
-            w_slot = self.get_weapon_slot(weapon_slot, skin_data['base_hull_id'])
-            ship.weapon_slots.remove(w_slot)
+        ship.weapon_slots = self.update_weapon_slots(ship.weapon_slots, skin_data['removed_weapon_slots'])
         return ship
 
-    def get_weapon_slot(self, weapon_slot: str, base_hull_id) -> WeaponSlot:
-        w_slot = self.__session.query(WeaponSlot).filter(
-            and_(
-                WeaponSlot.slot_id==weapon_slot,
-                WeaponSlot.ship_name==skin_data['base_hulll_id']
-            )
-        ).first()
-        return w_slot
+    def update_weapon_slots(self, weapon_slots: dict, removed_weapon_slots: list) -> dict:
+        for weapon_slot_id in removed_weapon_slots:
+            weapon_slots.pop(weapon_slot_id)
+        return weapon_slots
 
     def get_skin_data(self, path_to_skin_file: str) -> dict:
         skin_cleaned = json_load_skin(path_to_skin_file)

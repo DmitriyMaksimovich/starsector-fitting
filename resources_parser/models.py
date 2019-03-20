@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table, Boolean, Text
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table, Boolean, Text, JSON
 from sqlalchemy.orm import relationship
 
 
@@ -17,20 +17,20 @@ class Ship(Base):
     hull_size = Column(String(50))
     style = Column(String(50))
     center = Column(String(15))
-    weapon_slots = relationship("WeaponSlot", cascade="save-update, merge, delete")
     armor_rating = Column(Float)
     acceleration = Column(Float)
-    field_8_6_5_4 = Column(Float)
     cargo = Column(Float)
     deceleration = Column(Float)
     flux_dissipation = Column(Float)
     fuel = Column(Float)
     fuel_ly = Column(Float)
+    fighter_bays = Column(Integer)
     hitpoints = Column(Float)
     mass = Column(Float)
     max_crew = Column(Integer)
     max_flux = Column(Float)
     max_speed = Column(Float)
+    max_burn = Column(Integer)
     max_turn_rate = Column(Float)
     min_crew = Column(Integer)
     ordnance_points = Column(Integer)
@@ -39,29 +39,12 @@ class Ship(Base):
     shield_type = Column(String(20))
     shield_upkeep = Column(Float)
     supplies_month = Column(Float)
-    description = Column(Text)
     mod_name = Column(String(50))
+    weapon_slots = Column(JSON)
+    description = Column(Text)
 
     def __repr__(self):
-        return "<Ship(ship_name={})>".format(self.ship_name)
-
-
-class WeaponSlot(Base):
-    __tablename__ = 'weapon_slots'
-
-    id = Column(Integer, primary_key=True)
-    slot_id = Column(String(30))
-    angle = Column(Float)
-    arc = Column(Float)
-    mount = Column(String(10))
-    size = Column(String(15))
-    slot_type = Column(String(15))
-    location = Column(String(80))
-    ship_name = Column(String(100), ForeignKey('ships.hull_id'))
-    weapon = Column(String(50), ForeignKey('weapons.weapon_id'), nullable=True)
-
-    def __repr__(self):
-        return "<WeaponSlot(id={}, for ship_name={})>".format(self.id, self.ship_name)
+        return "<Ship(hull_id={})>".format(self.hull_id)
 
 
 class Weapon(Base):
