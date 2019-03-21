@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 
 
 class HullMod(models.Model):
@@ -14,7 +14,7 @@ class Ships(models.Model):
     height = models.FloatField(blank=True, null=True)
     hull_size = models.CharField(max_length=50, blank=True, null=True)
     style = models.CharField(max_length=50, blank=True, null=True)
-    center = models.CharField(max_length=15, blank=True, null=True)
+    center = ArrayField(models.FloatField())
     armor_rating = models.FloatField(blank=True, null=True)
     acceleration = models.FloatField(blank=True, null=True)
     cargo = models.FloatField(blank=True, null=True)

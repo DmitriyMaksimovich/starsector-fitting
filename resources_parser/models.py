@@ -1,4 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.types import ARRAY
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table, Boolean, Text, JSON
 from sqlalchemy.orm import relationship
 
@@ -16,7 +17,7 @@ class Ship(Base):
     height = Column(Float)
     hull_size = Column(String(50))
     style = Column(String(50))
-    center = Column(String(15))
+    center = Column(ARRAY(Float))
     armor_rating = Column(Float)
     acceleration = Column(Float)
     cargo = Column(Float)

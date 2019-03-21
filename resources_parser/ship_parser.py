@@ -69,7 +69,7 @@ class ShipParser(ShipsCache):
         ship_data['hull_id'] = ship_json['hullId']
         ship_data['hull_size'] = ship_json['hullSize']
         ship_data['style'] = self.get_ship_style(ship_json)
-        ship_data['center'] = ','. join([str(coord) for coord in ship_json['center']])
+        ship_data['center'] = ship_json['center']
         ship_data['built_in_mods'] = ship_json.get('builtInMods', None)
         ship_data['built_in_wings'] = ship_json.get('builtInWings', None)
         built_in_weapons = ship_json.get('builtInWeapons', {})
