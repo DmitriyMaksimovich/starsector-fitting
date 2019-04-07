@@ -95,6 +95,32 @@ class SearchShipView(generics.ListAPIView):
         return queryset
 
 
+class AvailableWeapons(generics.ListAPIView):
+    serializer_class = WeaponSerializer
+
+    def get_available_weapons_properties(self, ship: Ships):
+        weapon_types = set()
+        weapon_sizes = set()
+        ship_slots = ship.weapon_slots
+        for slot in ship_slots:
+            weapon_types.add(ship_slots[slot]['type'])
+            weapon_sizes.add(ship_slots[slot]['size'])
+        return {'types': weapon_types, 'sizes': weapon_sizes}
+
+    def get_available_weapons(self, ship):
+        weapons_properties = self.get_available_weapons_properties(ship)
+        sizes = weapons_properties['sizes']
+        types = weapons_properties['types']
+        weapons = Weapons.objects.filter(size__in=sizes).filter(weapon_type__in=types)
+        return weapons
+
+    def get_queryset(self):
+        hull_id = self.kwargs['ship_name']
+        ship = Ships.objects.get(pk=hull_id)
+        weapons = self.get_available_weapons(ship)
+        return weapons
+
+
 @api_view()
 def ship_filters_view(request, filter):
     if filter not in ('hull_size', 'style'):
