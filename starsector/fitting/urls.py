@@ -12,6 +12,8 @@ urlpatterns = [
     path('api/filters/weapons/<str:filter>', views.weapon_filters_view, name='weapon_filters_view'),
     path('api/search/ship/<str:ship_name>/', views.SearchShipView.as_view(), name='find_ship'),
     path('api/available_weapons/<str:ship_name>/', views.AvailableWeapons.as_view(), name='available_weapons'),
+    path('api/static/ui/', views.static_ui_view, name='static_ui'),
+    path('api/search/static/ui/<str:search_word>/', views.static_ui_search_view, name='static_ui_search'),
 ]
 
 

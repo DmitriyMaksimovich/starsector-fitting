@@ -1,3 +1,6 @@
+from os import listdir
+from os.path import isfile, join
+from django.conf import settings
 from rest_framework import generics, pagination, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -139,3 +142,22 @@ def weapon_filters_view(request, filter):
     values = [getattr(row, filter) for row in queryset]
     return Response({'count': len(values),
                      'values': values})
+
+
+@api_view()
+def static_ui_view(request):
+    ui_folder = settings.STATIC_ROOT + '/fitting/ui'
+    files = [f for f in listdir(ui_folder) if isfile(join(ui_folder, f))]
+    return Response({'count': len(files),
+                     'path': '/static/fitting/ui/',
+                     'values': files})
+
+@api_view()
+def static_ui_search_view(request, search_word):
+    search_word = search_word.lower()
+    ui_folder = settings.STATIC_ROOT + '/fitting/ui'
+    all_files = [f for f in listdir(ui_folder) if isfile(join(ui_folder, f))]
+    files = list(filter(lambda x: search_word in x.lower(), all_files))
+    return Response({'count': len(files),
+                     'path': '/static/fitting/ui/',
+                     'values': files})
